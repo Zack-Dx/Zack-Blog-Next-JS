@@ -11,6 +11,13 @@ export default defineType({
       type: "string",
     }),
     defineField({
+      name: "description",
+      title: "Description",
+      type: "text",
+      rows: 2,
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: "slug",
       title: "Slug",
       type: "slug",
@@ -48,13 +55,6 @@ export default defineType({
       name: "body",
       title: "Body",
       type: "blockContent",
-    }),
-    defineField({
-      name: "description",
-      title: "Description",
-      type: "text",
-      rows: 2,
-      validation: (Rule) => Rule.required(),
     }),
   ],
 
