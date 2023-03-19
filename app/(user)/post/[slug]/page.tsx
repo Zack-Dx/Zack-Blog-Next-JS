@@ -3,12 +3,25 @@ import Image from "next/image";
 import React from "react";
 import { client } from "../../../../lib/sanity.client";
 import urlFor from "../../../../lib/urlFor";
+import { PortableText } from "@portabletext/react";
+import { RichTextComponent } from "../../../../components/RichTextComponent";
 
 type Props = {
   params: {
     slug: string;
   };
 };
+export const revalidate = 60;
+export async function generateStaticParams() {
+  const query = groq`*[type == 'post']{
+    slug
+  }`;
+  const slug: Post[] = await client.fetch(query);
+  const slugRoutes = slug.map((slug) => slug.slug.current);
+  return slugRoutes.map((slug) => ({
+    slug,
+  }));
+}
 
 const Post = async ({ params: { slug } }: Props) => {
   const query = groq`
@@ -39,10 +52,41 @@ const Post = async ({ params: { slug } }: Props) => {
                 <h1 className="text-4xl font-extrabold">{post.title}</h1>
                 <p>{new Date(post._createdAt).toLocaleDateString()}</p>
               </div>
+              <div className="flex items-center space-x-2">
+                <Image
+                  className="rounded-full"
+                  src={urlFor(post.author.image).url()}
+                  alt={post.author.name}
+                  height={40}
+                  width={40}
+                />
+                <div className="w-64">
+                  <h3 className="text-lg font-bold">{post.author.name}</h3>
+                  <div>{/* author bio */}</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 className="italic pt-10">{post.description}</h2>
+              <div className="flex items-center justify-end mt-auto space-x-2">
+                {post.categories.map(
+                  (category: { _id: string; title: string }) => {
+                    return (
+                      <p
+                        key={category._id}
+                        className="bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold mt-4"
+                      >
+                        {category.title}
+                      </p>
+                    );
+                  }
+                )}
+              </div>
             </div>
           </section>
         </div>
       </section>
+      <PortableText value={post.body} components={RichTextComponent} />
     </article>
   );
 };

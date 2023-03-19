@@ -10,6 +10,7 @@ const query = groq`
   ...,author->, categories[]->
  } | order(_createdAt desc)
  `;
+export const revalidate = 60;
 const Homepage = async () => {
   if (previewData()) {
     return (
